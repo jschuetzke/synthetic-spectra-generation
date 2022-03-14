@@ -5,7 +5,6 @@
 
 import json
 import numpy as np
-import matplotlib.pyplot as plt
 
 # PARAMETERS
 n_datapoints = 5000

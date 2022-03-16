@@ -128,5 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-#macOS specific files
+# macOS specific files
 .DS_Store
+
+# ignore Keras models
+*.h5

@@ -133,3 +133,6 @@ dmypy.json
 
 # ignore Keras models
 *.h5
+
+# ignore simulated spectra (numpy arrays)
+*.npy

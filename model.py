@@ -56,13 +56,13 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
     return model
 
 def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
-           dropout_val=0.3, dense_neurons=[1024, 512], classes=50,
+           dropout_val=0, dense_neurons=[1024, 512], classes=50,
            normalize_bias=True, reg=0, last_act='sigmoid', opt=None, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1), name="input")
     x = input_layer
     # Pooling blocks
     for i in range(pooling_blocks):
-        x = layers.MaxPooling1D(pool_size=pooling_size, strides=pooling_stride,
+        x = layers.MaxPooling1D(pool_size=pooling_size, strides=pooling_strides,
                                 padding='same', 
                                 name=f'maxpool{i+1}')(x)
     x = layers.Flatten()(x)

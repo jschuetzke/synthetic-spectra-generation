@@ -4,7 +4,7 @@ from tensorflow.keras.models import Model
 
 def vgg(input_size=5000, dropout=.7, last_act='softmax',
         classes=500, lr=3e-4):
-    input_layer = layers.Input(shape=(input_size, 1), 
+    input_layer = layers.Input(shape=(input_size, 1),
                                name="input")
     x = layers.Conv1D(6, 5, strides=1, padding='same',
                       activation='relu', 
@@ -13,7 +13,7 @@ def vgg(input_size=5000, dropout=.7, last_act='softmax',
                          name='maxpool1')(x)
     x = layers.Dropout(dropout, name='dropout1')(x)
     x = layers.Conv1D(16, 5, strides=1, padding='same',
-		              activation='relu', 
+                      activation='relu', 
                       name='conv2_1')(x)
     x = layers.Conv1D(16, 5, strides=1, padding='same',
                       activation='relu', 
@@ -52,7 +52,7 @@ def vgg(input_size=5000, dropout=.7, last_act='softmax',
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)
-    opt = optimizers.Adam(lr=lr)
+    opt = optimizers.Adam(learning_rate=lr)
     if last_act == 'softmax':
         loss_fn = 'categorical_crossentropy'
         metrics_list = [metrics.CategoricalAccuracy(name='accuracy')]

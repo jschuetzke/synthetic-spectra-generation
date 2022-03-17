@@ -25,7 +25,7 @@ def cnn_2(input_size=5000, dropout=.5, last_act='softmax',
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)
-    opt = optimizers.Adam(lr=lr)
+    opt = optimizers.Adam(learning_rate=lr)
     if last_act == 'softmax':
         loss_fn = 'categorical_crossentropy'
         metrics_list = [metrics.CategoricalAccuracy(name='accuracy')]
@@ -65,7 +65,7 @@ def cnn_3(input_size=5000, dropout=.3, last_act='softmax',
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)
-    opt = optimizers.Adam(lr=lr)
+    opt = optimizers.Adam(learning_rate=lr)
     if last_act == 'softmax':
         loss_fn = 'categorical_crossentropy'
         metrics_list = [metrics.CategoricalAccuracy(name='accuracy')]

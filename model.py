@@ -56,8 +56,8 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
     return model
 
 def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
-           dropout_val=0, dense_neurons=[1024, 512], classes=50,
-           normalize_bias=True, reg=0, last_act='sigmoid', opt=None, lr=3e-4):
+           dropout_val=0, dense_neurons=[256, 256], classes=50,
+           normalize_bias=True, reg=0, last_act='softmax', opt=None, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1), name="input")
     x = input_layer
     # Pooling blocks

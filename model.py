@@ -4,7 +4,7 @@ from tensorflow.keras.models import Model
 
 def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3, 
             pooling_size=3, pooling_strides=2, layer_do=True, 
-            dropout_val=0.3, classes=50, dense_neurons=[1024, 512],
+            dropout=0.3, classes=50, dense_neurons=[1024, 512],
             reg=0, last_act='sigmoid', opt=None, lr=3e-4):
     #model_name = f'class{classes}_in{input_size}_ks{ks}_c{conv_layers}'
     input_layer = layers.Input(shape=(input_size, 1), name="input")
@@ -28,12 +28,12 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
     # Hidden Layers
     dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
     for i, neurons in enumerate(dense_neurons):
-        if dropout_val:
-            x = layers.Dropout(dropout_val)(x)
+        if dropout:
+            x = layers.Dropout(dropout)(x)
         x = layers.Dense(neurons, activation='relu',
                          name=f'dense{i}')(x)
-    if dropout_val:
-        x = layers.Dropout(dropout_val)(x)
+    if dropout:
+        x = layers.Dropout(dropout)(x)
     
     # Output
     out = layers.Dense(classes, activation=last_act, name='output', 
@@ -56,7 +56,7 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
     return model
 
 def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
-           dropout_val=0, dense_neurons=[256, 256], classes=50,
+           dropout=0, dense_neurons=[256, 256], classes=50,
            normalize_bias=True, reg=0, last_act='softmax', opt=None, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1), name="input")
     x = input_layer
@@ -70,12 +70,12 @@ def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
     # Hidden Layers
     dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
     for i, neurons in enumerate(dense_neurons):
-        if dropout_val:
-            x = layers.Dropout(dropout_val)(x)
+        if dropout:
+            x = layers.Dropout(dropout)(x)
         x = layers.Dense(neurons, activation='relu',
                          name=f'dense{i}')(x)
-    if dropout_val:
-        x = layers.Dropout(dropout_val)(x)
+    if dropout:
+        x = layers.Dropout(dropout)(x)
     
     # Output
     bias_init = initializers.Constant(np.log(1./classes)) if normalize_bias else 'zeros'

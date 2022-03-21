@@ -36,15 +36,13 @@ def main():
         peaks = np.array(config[phase]['peak_positions'])
         peak_heights = np.array(config[phase]['peak_heights'])
         # test - use exact values + defined variations
-        extra = 100
-        scan = np.zeros(datapoints+2*extra)
-        scan[peaks+extra] = peak_heights
-        scan = gaussian_filter1d(scan, 2)
-        x_test[i*n_test] = scan[extra:datapoints+extra]
-        right_bound = extra+int(shift_range/2)
-        left_bound = extra-int(shift_range/2)
-        x_test[i*n_test+1] = scan[right_bound:datapoints+right_bound]
-        x_test[i*n_test+2] = scan[left_bound:datapoints+left_bound]
+        scan = np.zeros([3, datapoints])
+        scan[0,peaks] = peak_heights
+        scan[1,np.clip(np.array(peaks)-25, 0, 4999)] = peak_heights
+        scan[2,np.clip(np.array(peaks)+25, 0, 4999)] = peak_heights
+        x_test[i*n_test] = gaussian_filter1d(scan[0], 2, mode='constant')
+        x_test[i*n_test+1] = gaussian_filter1d(scan[1], 2, mode='constant')
+        x_test[i*n_test+2] = gaussian_filter1d(scan[2], 2, mode='constant')
         y_test[i*n_test:(i+1)*n_test] = i
         for j in range(n_val):
             # apply shift and clip peak positions outside range
@@ -53,7 +51,7 @@ def main():
             new_heights = np.clip(np.array([rng.uniform(f-variation_range, f+variation_range) for f in peak_heights]), 0, 2)
             scan = np.zeros(datapoints)
             scan[new_peaks] = new_heights
-            scan = gaussian_filter1d(scan, rng.uniform(*kernel_range))
+            scan = gaussian_filter1d(scan, rng.uniform(*kernel_range), mode='constant')
             x_val[(i*n_val)+j] = scan
         y_val[i*n_val:(i+1)*n_val] = i
         for j in range(n_train):
@@ -63,7 +61,7 @@ def main():
             new_heights = np.clip(np.array([rng.uniform(f-variation_range, f+variation_range) for f in peak_heights]), 0, 2)
             scan = np.zeros(datapoints)
             scan[new_peaks] = new_heights
-            scan = gaussian_filter1d(scan, rng.uniform(*kernel_range))
+            scan = gaussian_filter1d(scan, rng.uniform(*kernel_range), mode='constant')
             gaus = 1/3 * np.clip(rng.normal(0, 1, scan.size), -3, 3)
             gaus = (gaus*.5)+.5
             noise_lvl = rng.uniform(.01, .02)

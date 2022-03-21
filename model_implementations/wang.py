@@ -39,16 +39,16 @@ def vgg(input_size=5000, dropout=.7, last_act='softmax',
     x = layers.MaxPool1D(2, strides=2, 
                          name='maxpool4')(x)
     x = layers.Dropout(dropout, name='dropout4')(x)
-    out = layers.Flatten(name='flat')(x)
-    out = layers.Dense(120, activation='relu',
+    x = layers.Flatten(name='flat')(x)
+    x = layers.Dense(120, activation='relu',
                        kernel_initializer='he_uniform',
-                       name='dense1')(out)
-    out = layers.Dense(84, activation='relu',
+                       name='dense1')(x)
+    x = layers.Dense(84, activation='relu',
                        kernel_initializer='he_uniform',
-                       name='dense2')(out)
-    out = layers.Dense(186, activation='relu',
+                       name='dense2')(x)
+    x = layers.Dense(186, activation='relu',
                        kernel_initializer='he_uniform',
-                       name='dense3')(out)
+                       name='dense3')(x)
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)

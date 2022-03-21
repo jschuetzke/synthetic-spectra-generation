@@ -3,7 +3,7 @@ from tensorflow.keras import layers, optimizers, metrics
 from tensorflow.keras.models import Model
 
 def cnn_2(input_size=5000, dropout=.5, last_act='softmax',
-          classes=500, lr=3e-4):
+          dense_neurons=[2000, 500], classes=500, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1),
                                name="input")
     x = layers.Conv1D(64, 50, strides=2, padding='same',
@@ -17,11 +17,15 @@ def cnn_2(input_size=5000, dropout=.5, last_act='softmax',
     x = layers.MaxPool1D(2, strides=3, 
                          name='maxpool2')(x)
     x = layers.Flatten(name='flat')(x)
-    x = layers.Dropout(dropout, name='dropout1')(x)
-    x = layers.Dense(2000, name='dense1')(x) # None activation
-    x = layers.Dropout(dropout, name='dropout2')(x)
-    x = layers.Dense(500, name='dense2')(x) # None activation
-    x = layers.Dropout(dropout, name='dropout3')(x)
+    # Hidden Layers
+    dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
+    for i, neurons in enumerate(dense_neurons):
+        if dropout:
+            x = layers.Dropout(dropout)(x)
+        x = layers.Dense(neurons, activation=None,
+                         name=f'dense{i}')(x)
+    if dropout:
+        x = layers.Dropout(dropout)(x)
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)
@@ -38,7 +42,7 @@ def cnn_2(input_size=5000, dropout=.5, last_act='softmax',
     return model
 
 def cnn_3(input_size=5000, dropout=.3, last_act='softmax',
-          classes=500, lr=3e-4):
+          dense_neurons=[2500, 1000], classes=500, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1), 
                                name="input")
     x = layers.Conv1D(64, 20, strides=1, padding='same',
@@ -57,11 +61,15 @@ def cnn_3(input_size=5000, dropout=.3, last_act='softmax',
     x = layers.MaxPool1D(1, strides=2, 
                          name='maxpool3')(x)
     x = layers.Flatten(name='flat')(x)
-    x = layers.Dropout(dropout, name='dropout1')(x)
-    x = layers.Dense(2500, name='dense1')(x) # None activation
-    x = layers.Dropout(dropout, name='dropout2')(x)
-    x = layers.Dense(1000, name='dense2')(x) # None activation
-    x = layers.Dropout(dropout, name='dropout3')(x)
+    # Hidden Layers
+    dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
+    for i, neurons in enumerate(dense_neurons):
+        if dropout:
+            x = layers.Dropout(dropout)(x)
+        x = layers.Dense(neurons, activation=None,
+                         name=f'dense{i}')(x)
+    if dropout:
+        x = layers.Dropout(dropout)(x)
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)

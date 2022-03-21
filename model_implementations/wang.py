@@ -2,8 +2,8 @@
 from tensorflow.keras import layers, optimizers, metrics
 from tensorflow.keras.models import Model
 
-def vgg(input_size=5000, dropout=.7, last_act='softmax',
-        classes=500, lr=3e-4):
+def vgg(input_size=5000, dropout=0, last_act='softmax',
+        dense_neurons=[120, 84, 186], classes=500, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1),
                                name="input")
     x = layers.Conv1D(6, 5, strides=1, padding='same',
@@ -40,15 +40,15 @@ def vgg(input_size=5000, dropout=.7, last_act='softmax',
                          name='maxpool4')(x)
     x = layers.Dropout(dropout, name='dropout4')(x)
     x = layers.Flatten(name='flat')(x)
-    x = layers.Dense(120, activation='relu',
-                       kernel_initializer='he_uniform',
-                       name='dense1')(x)
-    x = layers.Dense(84, activation='relu',
-                       kernel_initializer='he_uniform',
-                       name='dense2')(x)
-    x = layers.Dense(186, activation='relu',
-                       kernel_initializer='he_uniform',
-                       name='dense3')(x)
+    # Hidden Layers
+    dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
+    for i, neurons in enumerate(dense_neurons):
+        if dropout:
+            x = layers.Dropout(dropout)(x)
+        x = layers.Dense(neurons, activation='relu',
+                         name=f'dense{i}')(x)
+    if dropout:
+        x = layers.Dropout(dropout)(x)
     out = layers.Dense(classes, activation=last_act, 
                        name='output')(x)
     model = Model(input_layer, out)

@@ -65,7 +65,7 @@ def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
         x = layers.MaxPooling1D(pool_size=pooling_size, strides=pooling_strides,
                                 padding='same', 
                                 name=f'maxpool{i+1}')(x)
-    x = layers.Flatten()(x)
+    x = layers.Flatten(name='flat')(x)
     
     # Hidden Layers
     dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)

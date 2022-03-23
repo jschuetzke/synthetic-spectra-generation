@@ -56,7 +56,7 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
     return model
 
 def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
-           dropout=0, dense_neurons=[256, 256], classes=50,
+           dropout=0, dense_neurons=[256, 256], classes=50, hidden_act='relu',
            normalize_bias=True, reg=0, last_act='softmax', opt=None, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1), name="input")
     x = input_layer
@@ -70,8 +70,12 @@ def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
     # Hidden Layers
     dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
     for i, neurons in enumerate(dense_neurons):
-        x = layers.Dense(neurons, activation='relu',
+        x = layers.Dense(neurons, activation=None,
                          name=f'dense{i}')(x)
+        if hidden_act == 'leakyrelu':
+            x = layers.ReLU(negative_slop=.1)(x)
+        else:
+            x = layers.Activation(hidden_act)(x)
         if dropout:
             x = layers.Dropout(dropout)(x)
     

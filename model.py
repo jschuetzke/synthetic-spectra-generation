@@ -5,7 +5,7 @@ from tensorflow.keras.models import Model
 def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3, 
             pooling_size=3, pooling_strides=2, layer_do=True, 
             dropout=0.3, classes=50, dense_neurons=[1024, 512],
-            reg=0, last_act='sigmoid', opt=None, lr=3e-4):
+            hidden_act='relu', reg=0, last_act='sigmoid', opt=None, lr=3e-4):
     #model_name = f'class{classes}_in{input_size}_ks{ks}_c{conv_layers}'
     input_layer = layers.Input(shape=(input_size, 1), name="input")
     x = input_layer
@@ -28,12 +28,15 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
     # Hidden Layers
     dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
     for i, neurons in enumerate(dense_neurons):
+        x = layers.Dense(neurons, activation=None,
+                         kernel_regularizer=regularizers.L1(1e-3),
+                         name=f'dense{i}')(x)
+        if hidden_act == 'leakyrelu':
+            x = layers.ReLU(negative_slop=.1)(x)
+        else:
+            x = layers.Activation(hidden_act)(x)
         if dropout:
             x = layers.Dropout(dropout)(x)
-        x = layers.Dense(neurons, activation='relu',
-                         name=f'dense{i}')(x)
-    if dropout:
-        x = layers.Dropout(dropout)(x)
     
     # Output
     out = layers.Dense(classes, activation=last_act, name='output', 

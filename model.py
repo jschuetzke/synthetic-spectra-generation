@@ -32,7 +32,7 @@ def convnet(input_size=5000, ks=20, conv_filters=4, conv_layers=3,
                          kernel_regularizer=regularizers.L1(1e-3),
                          name=f'dense{i}')(x)
         if hidden_act == 'leakyrelu':
-            x = layers.ReLU(negative_slop=.1)(x)
+            x = layers.ReLU(negative_slope=.1)(x)
         else:
             x = layers.Activation(hidden_act)(x)
         if dropout:
@@ -77,7 +77,7 @@ def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
                          kernel_regularizer=regularizers.L1(1e-3),
                          name=f'dense{i}')(x)
         if hidden_act == 'leakyrelu':
-            x = layers.ReLU(negative_slop=.1)(x)
+            x = layers.ReLU(negative_slope=.1)(x)
         else:
             x = layers.Activation(hidden_act)(x)
         if dropout:

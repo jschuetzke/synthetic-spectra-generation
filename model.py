@@ -70,12 +70,10 @@ def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
     # Hidden Layers
     dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
     for i, neurons in enumerate(dense_neurons):
-        if dropout:
-            x = layers.Dropout(dropout)(x)
         x = layers.Dense(neurons, activation='relu',
                          name=f'dense{i}')(x)
-    if dropout:
-        x = layers.Dropout(dropout)(x)
+        if dropout:
+            x = layers.Dropout(dropout)(x)
     
     # Output
     bias_init = initializers.Constant(np.log(1./classes)) if normalize_bias else 'zeros'

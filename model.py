@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras import initializers, layers, metrics, optimizers, regularizers
 from tensorflow.keras.models import Model
 
@@ -88,6 +89,59 @@ def simple(input_size=5000, pooling_blocks=3, pooling_size=3, pooling_strides=2,
     out = layers.Dense(classes, activation=last_act, name='output', 
                        bias_initializer=bias_init, 
                        kernel_regularizer=regularizers.L2(l2=reg))(x)
+    model = Model(inputs=input_layer, outputs=out)
+    
+    # Optimizer and Loss
+    if opt is None:
+        opt = optimizers.Adam(learning_rate=lr)
+    if last_act == 'softmax':
+        loss_fn = 'categorical_crossentropy'
+        metrics_list = [metrics.CategoricalAccuracy(name='accuracy')]
+    else:
+        loss_fn = 'binary_crossentropy'
+        metrics_list = [metrics.BinaryAccuracy(name='accuracy'), 
+                           metrics.Recall(), metrics.Precision()]
+    model.compile(optimizer=opt, loss=loss_fn,
+                  metrics=metrics_list)
+    return model
+
+class PositiveRandom(tf.keras.initializers.GlorotUniform):
+    def __call__(self, shape, dtype=None, **kwargs):
+        weights = super().__call__(shape, dtype, **kwargs)
+        min_values = tf.math.reduce_min(weights, axis=1, keepdims=True)
+        return weights - min_values + tf.keras.backend.epsilon()
+
+def succession(input_size=5000, pooling_blocks=5, pooling_size=7, pooling_strides=2,
+               dropout=0.3, hidden_layers=2, classes=50, hidden_act='relu',
+               last_act='softmax', opt=None, lr=3e-4):
+    input_layer = layers.Input(shape=(input_size, 1), name="input")
+    x = input_layer
+    # Pooling blocks
+    for i in range(pooling_blocks):
+        x = layers.MaxPooling1D(pool_size=pooling_size, strides=pooling_strides,
+                                padding='same', 
+                                name=f'maxpool{i+1}')(x)
+    x = layers.Flatten(name='flat')(x)
+    
+    # Hidden Layers
+    kernel_init = 'glorot_uniform' if hidden_act != 'relu' else PositiveRandom
+    kernel_reg = 1e-2/classes
+    for i in range(hidden_layers):
+        x = layers.Dense(classes*2, activation=None,
+                         kernel_initializer=kernel_init,
+                         kernel_regularizer=regularizers.L1(kernel_reg),
+                         name=f'dense{i}')(x)
+        if hidden_act == 'leakyrelu':
+            x = layers.ReLU(negative_slope=.1)(x)
+        else:
+            x = layers.Activation(hidden_act)(x)
+        if dropout:
+            x = layers.Dropout(dropout)(x)
+    
+    # Output
+    output_reg = 1e-4/classes
+    out = layers.Dense(classes, activation=last_act, name='output', 
+                       kernel_regularizer=regularizers.L2(l2=output_reg))(x)
     model = Model(inputs=input_layer, outputs=out)
     
     # Optimizer and Loss

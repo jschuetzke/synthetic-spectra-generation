@@ -11,30 +11,30 @@ from scipy.ndimage import gaussian_filter1d
 shift_range = 50 # for now, we shift all peaks independently
 variation_range = 0.05 # +/- of absolute height for each peak
 kernel_range = (2, 5) # min and max for guassian kernel sizes
-datapoints = 5000
 
-n_test = 3
-n_val = 5
-n_train = 10
+n_test = 3 # predefined variations, just here for clarity
+n_val = 10
+n_train = 50
 
 def main():   
-    with open('dataset_configs/dataset1.json', 'r') as file:
+    with open('dataset_configs/dataset500.json', 'r') as file:
         config = json.load(file)
+    datapoints = config['datapoints']
+    n_classes = config['classes']
 
-    n_phases = len(config.keys())
-
-    x_train = np.zeros([(n_train*n_phases), datapoints])
-    x_val = np.zeros([(n_val*n_phases), datapoints])
-    x_test = np.zeros([(n_test*n_phases), datapoints])
-    y_train = np.zeros(n_train*n_phases)
-    y_val = np.zeros(n_val*n_phases)
-    y_test = np.zeros(n_test*n_phases)
+    x_train = np.zeros([(n_train*n_classes), datapoints])
+    x_val = np.zeros([(n_val*n_classes), datapoints])
+    x_test = np.zeros([(n_test*n_classes), datapoints])
+    y_train = np.zeros(n_train*n_classes)
+    y_val = np.zeros(n_val*n_classes)
+    y_test = np.zeros(n_test*n_classes)
 
     rng = np.random.default_rng(2022)
 
-    for i, phase in enumerate(tqdm(config.keys())):
-        peaks = np.array(config[phase]['peak_positions'])
-        peak_heights = np.array(config[phase]['peak_heights'])
+    spectra = config['spectra']
+    for i, phase in enumerate(tqdm(spectra.keys())):
+        peaks = np.array(spectra[phase]['peak_positions'])
+        peak_heights = np.array(spectra[phase]['peak_heights'])
         # test - use exact values + defined variations
         scan = np.zeros([3, datapoints])
         scan[0,peaks] = peak_heights

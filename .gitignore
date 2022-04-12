@@ -136,3 +136,6 @@ dmypy.json
 
 # ignore simulated spectra (numpy arrays)
 *.npy
+
+# ignore notebooks
+*.ipynb

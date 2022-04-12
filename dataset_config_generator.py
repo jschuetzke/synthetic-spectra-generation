@@ -8,6 +8,7 @@ import numpy as np
 
 # PARAMETERS
 n_datapoints = 5000
+boundary = 100
 n_classes = 500
 min_peaks = 2
 max_peaks = 10
@@ -17,6 +18,7 @@ def main():
     rng = np.random.default_rng(2022)
     config = {
         'datapoints' : n_datapoints,
+        'boundary' : boundary,
         'classes' : n_classes,
         'min_peaks' : min_peaks,
         'max_peaks' : max_peaks,
@@ -25,8 +27,11 @@ def main():
     spectra = {}
     for phase in range(n_classes):
         n_peaks = rng.integers(min_peaks, max_peaks, endpoint=True)
-        peak_positions = rng.integers(0, n_datapoints, n_peaks, endpoint=True)
-        peak_heights = rng.integers(0, max_height, n_peaks)
+        peak_positions = rng.integers(boundary, n_datapoints-boundary, 
+                                      n_peaks)
+        peak_heights = rng.integers(0, max_height, n_peaks, endpoint=True)
+        # scale peak heights according to highest peak in the list
+        # sets highest peak in list to 1 and scales others accordingly
         peak_heights = np.round(peak_heights / np.max(peak_heights), 3)
         phase_dict = {'peak_positions': np.sort(peak_positions).tolist(),
                       'peak_heights' : peak_heights[np.argsort(peak_positions)].tolist()}

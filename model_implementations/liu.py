@@ -15,7 +15,7 @@ def cnn(input_size=5000, dropout=.5, dense_neurons=[2048],
     x = conv1d(x, 32, 11, activation='leakyrelu', batch_norm=True)
     x = layers.MaxPool1D(2, strides=2, 
                          name='maxpool2')(x)
-    x = conv1d(input_layer, 64, 5, activation='leakyrelu', batch_norm=True)
+    x = conv1d(x, 64, 5, activation='leakyrelu', batch_norm=True)
     x = layers.MaxPool1D(2, strides=2, 
                          name='maxpool3')(x)
     x = layers.Flatten(name='flat')(x)

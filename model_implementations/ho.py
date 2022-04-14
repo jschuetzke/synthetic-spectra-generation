@@ -4,7 +4,7 @@ from tensorflow.keras.models import Model
 from .basic_blocks import residual_block
         
 def resnet(input_size=5000, filters=100, layer_num=6, blocks_per_layer=2, 
-           batch_norm=True, last_act='softmax', dense_neurons=[], 
+           batch_norm=True, dense_neurons=[], 
            dropout=.5, classes=500, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1),
                                name="input")
@@ -26,19 +26,12 @@ def resnet(input_size=5000, filters=100, layer_num=6, blocks_per_layer=2,
                          name=f'dense{i}')(x)
     if dropout:
         x = layers.Dropout(dropout)(x)
-    out = layers.Dense(classes, activation=last_act, 
+    out = layers.Dense(classes, activation='softmax', 
                        name='output')(x)
     model = Model(input_layer, out)
     opt = optimizers.Adam(learning_rate=lr)
-    if last_act == 'softmax':
-        loss_fn = 'categorical_crossentropy'
-        metrics_list = [metrics.CategoricalAccuracy(name='accuracy')]
-    else:
-        loss_fn = 'binary_crossentropy'
-        metrics_list = [metrics.BinaryAccuracy(name='accuracy'), 
-                        metrics.Recall(), metrics.Precision()]
-    model.compile(optimizer=opt, loss=loss_fn,
-                  metrics=metrics_list)
+    model.compile(optimizer=opt, loss='categorical_crossentropy',
+                  metrics=[metrics.CategoricalAccuracy(name='accuracy')])
     return model
             
 

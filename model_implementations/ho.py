@@ -1,7 +1,7 @@
 
 from tensorflow.keras import layers, optimizers, metrics
 from tensorflow.keras.models import Model
-from .basic_blocks import residual_block
+from .basic_blocks import residual_block, get_dense_stack
         
 def resnet(input_size=5000, filters=100, layer_num=6, blocks_per_layer=2, 
            batch_norm=True, dense_neurons=[], 
@@ -17,15 +17,7 @@ def resnet(input_size=5000, filters=100, layer_num=6, blocks_per_layer=2,
             block_type = 'conv' if b == 0 else 'identity'
             x = residual_block(x, block_type=block_type, batch_norm=batch_norm)
     x = layers.Flatten(name='flat')(x)
-    # Hidden Layers
-    dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
-    for i, neurons in enumerate(dense_neurons):
-        if dropout:
-            x = layers.Dropout(dropout)(x)
-        x = layers.Dense(neurons, activation=None,
-                         name=f'dense{i}')(x)
-    if dropout:
-        x = layers.Dropout(dropout)(x)
+    x = get_dense_stack(x, dense_neurons, dropout)
     out = layers.Dense(classes, activation='softmax', 
                        name='output')(x)
     model = Model(input_layer, out)

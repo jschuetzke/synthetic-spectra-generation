@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir wandb
 COPY x_train.npy x_val.npy x_test.npy y_train.npy y_val.npy y_test.npy ./
 ADD model_implementations/ ./model_implementations/
 COPY benchmark.py benchmark.sh ./
-RUN chmod +x /benchmark.sh
+RUN chmod +x ./benchmark.sh
 
-CMD ["/benchmark.sh"]
+CMD ["./benchmark.sh"]

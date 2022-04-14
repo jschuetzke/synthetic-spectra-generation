@@ -1,6 +1,7 @@
 
 from tensorflow.keras import layers, optimizers, metrics
 from tensorflow.keras.models import Model
+from .basic_blocks import get_dense_stack
 
 def vgg(input_size=5000, dropout=0, dense_neurons=[120, 84, 186], 
         classes=500, lr=3e-4):
@@ -40,15 +41,7 @@ def vgg(input_size=5000, dropout=0, dense_neurons=[120, 84, 186],
                          name='maxpool4')(x)
     x = layers.Dropout(dropout, name='dropout4')(x)
     x = layers.Flatten(name='flat')(x)
-    # Hidden Layers
-    dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
-    for i, neurons in enumerate(dense_neurons):
-        if dropout:
-            x = layers.Dropout(dropout)(x)
-        x = layers.Dense(neurons, activation='relu',
-                         name=f'dense{i}')(x)
-    if dropout:
-        x = layers.Dropout(dropout)(x)
+    x = get_dense_stack(x, dense_neurons, dropout)
     out = layers.Dense(classes, activation='softmax', 
                        name='output')(x)
     model = Model(input_layer, out)

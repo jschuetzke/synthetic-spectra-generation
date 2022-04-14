@@ -1,6 +1,7 @@
 
 from tensorflow.keras import layers, optimizers, metrics
 from tensorflow.keras.models import Model
+from .basic_blocks import get_dense_stack
 
 def cnn(input_size=5000, dropout=.7, dense_neurons=[3100, 1200], 
         classes=500, lr=3e-4):
@@ -37,15 +38,7 @@ def cnn(input_size=5000, dropout=.7, dense_neurons=[3100, 1200],
     x = layers.MaxPool1D(1, strides=2, 
                          name='maxpool6')(x)
     x = layers.Flatten(name='flat')(x)
-    # Hidden Layers
-    dense_neurons = dense_neurons if type(dense_neurons) is list else list(dense_neurons)
-    for i, neurons in enumerate(dense_neurons):
-        if dropout:
-            x = layers.Dropout(dropout)(x)
-        x = layers.Dense(neurons, activation='relu',
-                         name=f'dense{i}')(x)
-    if dropout:
-        x = layers.Dropout(dropout)(x)
+    x = get_dense_stack(x, dense_neurons, dropout)
     opt = optimizers.Adam(learning_rate=lr)
     out = layers.Dense(classes, activation='softmax', 
                        name='output')(x)

@@ -19,6 +19,19 @@ def conv1d(input_layer, filters, kernel_size, strides=1, padding='same',
         x = get_activation(activation)(x)
     return x
 
+def get_dense_stack(flatten_layer, dense_neurons, dropout, activation=None):
+    x = flatten_layer
+    # Hidden Layers
+    dense_neurons = dense_neurons if type(dense_neurons) is list else [dense_neurons]
+    for i, neurons in enumerate(dense_neurons):
+        if dropout:
+            x = layers.Dropout(dropout)(x)
+        x = layers.Dense(neurons, activation=None,
+                         name=f'dense{i}')(x)
+    if dropout:
+        x = layers.Dropout(dropout)(x)
+    return x
+
 def residual_block(input_layer, filters=100, kernel_size=5, 
                    block_type='identity', batch_norm=True):
     if block_type == 'conv':

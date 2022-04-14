@@ -51,7 +51,7 @@ def residual_block(input_layer, filters=100, kernel_size=5,
     out = layers.Activation('relu')(add)
     return out
         
-def inception_block(input_layer, filter_list):
+def inception_block_v1(input_layer, filter_list):
     inc1 = conv1d(input_layer, filter_list[0], 1)
     inc2 = conv1d(input_layer, filter_list[1], 1)
     inc2 = conv1d(inc2, filter_list[2], 3)

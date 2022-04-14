@@ -53,9 +53,9 @@ model_list = ['cnn2', 'cnn3', 'cnn6', 'vgg', 'resnet', 'cnn_bn', 'inc3', 'inc6']
 
 for model_name in model_list:
     for seed in range(5):
-        wandb.init(project="synthetic-benchmark")
+        wandb.init(project="synthetic-benchmark", reinit=True)
         wandb.config.update({'model_type' : model_name, 'seed' : seed,
-                             'batch_size' : batch_size})
+                             'batch_size' : batch_size}, allow_val_change=True)
         callbacks = [EarlyStopping(patience=25, verbose=1,
                                    restore_best_weights=True, min_delta=0.0001),
                      ReduceLROnPlateau(patience=10, verbose=1),

@@ -8,10 +8,8 @@ def get_activation(name):
 
 # we want batch-norm between conv and activation, so define function
 def conv1d(input_layer, filters, kernel_size, strides=1, padding='same',
-           activation='relu', kernel_initializer='he_uniform', 
-           use_bias=False, batch_norm=False):
+           activation='relu', batch_norm=False):
     x = layers.Conv1D(filters, kernel_size, strides=strides, padding=padding, 
-                      use_bias=use_bias, kernel_initializer=kernel_initializer
                       )(input_layer)
     if batch_norm:
         x = layers.BatchNormalization()(x)
@@ -26,7 +24,7 @@ def get_dense_stack(flatten_layer, dense_neurons, dropout, activation=None):
     for i, neurons in enumerate(dense_neurons):
         if dropout:
             x = layers.Dropout(dropout)(x)
-        x = layers.Dense(neurons, activation=None,
+        x = layers.Dense(neurons, activation=activation,
                          name=f'dense{i}')(x)
     if dropout:
         x = layers.Dropout(dropout)(x)

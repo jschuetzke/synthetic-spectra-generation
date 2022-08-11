@@ -38,8 +38,7 @@ def cnn(input_size=5000, dropout=.7, dense_neurons=[3100, 1200],
     x = layers.MaxPool1D(1, strides=2, 
                          name='maxpool6')(x)
     x = layers.Flatten(name='flat')(x)
-    x = get_dense_stack(x, dense_neurons, dropout)
-    opt = optimizers.Adam(learning_rate=lr)
+    x = get_dense_stack(x, dense_neurons, dropout, activation='relu')
     out = layers.Dense(classes, activation='softmax', 
                        name='output')(x)
     model = Model(input_layer, out)

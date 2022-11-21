@@ -13,6 +13,7 @@ n_classes = 500
 min_peaks = 2
 max_peaks = 10
 max_height = 100
+distribution = 'gamma' # 'uniform' alternative
 
 def main():
     rng = np.random.default_rng(2022)
@@ -26,10 +27,15 @@ def main():
         }
     spectra = {}
     for phase in range(n_classes):
-        n_peaks = rng.integers(min_peaks, max_peaks, endpoint=True)
+        if distribution == 'gamma':
+            n_peaks = np.round((rng.gamma(1.2,1.2)+2)).astype(int) # favor less peaks
+        elif distribution == 'uniform':
+            n_peaks = rng.integers(min_peaks, max_peaks, endpoint=True)
+        else:
+            raise ValueError(f'unknown distribution {distribution}')
         peak_positions = rng.integers(boundary, n_datapoints-boundary, 
-                                      n_peaks)
-        peak_heights = rng.integers(0, max_height, n_peaks, endpoint=True)
+                                      n_peaks)[:max_peaks]
+        peak_heights = rng.integers(1, max_height, n_peaks, endpoint=True)[:max_peaks]
         # scale peak heights according to highest peak in the list
         # sets highest peak in list to 1 and scales others accordingly
         peak_heights = np.round(peak_heights / np.max(peak_heights), 3)

@@ -3,7 +3,7 @@ from tensorflow.keras import layers, optimizers, metrics
 from tensorflow.keras.models import Model
 from .basic_blocks import get_dense_stack, inception_block_v1
 
-def cnn_2(input_size=5000, dropout=.5, dense_neurons=[2000, 500],
+def cnn_2(input_size=5000, dropout=.3, dense_neurons=[2000, 500],
           classes=500, lr=3e-4):
     input_layer = layers.Input(shape=(input_size, 1),
                                name="input")

@@ -12,6 +12,10 @@ shift_range = 50 # for now, we shift all peaks independently
 variation_range = 0.05 # +/- of absolute height for each peak
 kernel_range = (2, 5) # min and max for guassian kernel sizes
 
+# less variation for test data
+test_shift = 30 
+test_var = 0.04
+
 n_test = 9 # predefined variations, just here for clarity
 n_val = 10
 n_train = 50
@@ -28,14 +32,6 @@ def vary_peaks(position_list, height_list):
         rng.uniform(f-variation_range, f+variation_range) for f in height_list
         ]), 0, 2)
     return new_positions, new_heights
-
-def add_noise(input_scan):
-    scan = input_scan.copy() #avoiding pointer confusion
-    gaus = 1/3 * np.clip(rng.normal(0, 1, scan.size), -3, 3)
-    gaus = (gaus*.5)+.5
-    noise_lvl = rng.uniform(.01, .02)
-    scan += gaus * (noise_lvl*np.max(scan))
-    return scan  
 
 def main():   
     with open('dataset_configs/dataset500.json', 'r') as file:
@@ -64,8 +60,6 @@ def main():
             # convolve with gaussian kernel
             scan = gaussian_filter1d(scan, rng.uniform(*kernel_range), 
                                      mode='constant')
-            # adding gaussian noise to training data
-            scan = add_noise(scan)
             x_train[(i*n_train)+j] = scan
         y_train[i*n_train:(i+1)*n_train] = i
         
@@ -85,20 +79,28 @@ def main():
         scan = np.zeros([n_test, datapoints])
         scan[0,peak_positions] = peak_heights # exact reference
         # two variants with exact heights and -25/+25 position shifts
-        pos_left = np.clip(np.array(peak_positions)-25, 0, 4999)
-        pos_right = np.clip(np.array(peak_positions)+25, 0, 4999)
+        if int(phase) in [8,318]: # exclude classes with overlapping positions
+            pos_left = np.clip(np.array(peak_positions)-17, 0, 4999)
+            pos_right = np.clip(np.array(peak_positions)+17, 0, 4999)
+        else:
+            pos_left = np.clip(np.array(peak_positions)-test_shift, 0, 4999)
+            pos_right = np.clip(np.array(peak_positions)+test_shift, 0, 4999)
         scan[1,pos_left] = peak_heights
         scan[2,pos_right] = peak_heights
-        # three variants with -25/0/+25 shifts and 0.2 higher intensities
-        new_heights = [f+.2 if f != 1. else f for f in peak_heights]
-        scan[3,peak_positions] = new_heights
-        scan[4,pos_left] = new_heights
-        scan[5,pos_right] = new_heights
-        # three variants with -25/0/+25 shifts and 0.2 lower intensities
-        new_heights = [f-.2 if f != 1. else f for f in peak_heights]
-        scan[6,peak_positions] = new_heights
-        scan[7,pos_left] = new_heights
-        scan[8,pos_right] = new_heights
+        # manual modifications to prevent overlap in test data
+        # change lines for modified config!
+        if int(phase) in [164,281,219,347]: # exclude classes with overlapping ints
+            new_hi_hi = np.array([f+0.025 if f != 1. else f for f in peak_heights])
+            new_hi_lo = np.array([f-0.025 if f != 1. else f for f in peak_heights])
+        else:
+            new_hi_hi = np.array([f+test_var if f != 1. else f for f in peak_heights])
+            new_hi_lo = np.array([f-test_var if f != 1. else f for f in peak_heights])
+        scan[3,peak_positions] = np.clip(new_hi_hi,0,2)
+        scan[4,pos_left] = np.clip(new_hi_hi,0,2)
+        scan[5,pos_right] = np.clip(new_hi_hi,0,2)
+        scan[6,peak_positions] = np.clip(new_hi_lo,0,2)
+        scan[7,pos_left] = np.clip(new_hi_lo,0,2)
+        scan[8,pos_right] = np.clip(new_hi_lo,0,2)
         for j in range(n_test):
             x_test[i*n_test+j] = gaussian_filter1d(scan[j], 2, mode='constant')
         y_test[i*n_test:(i+1)*n_test] = i   

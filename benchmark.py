@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
@@ -31,21 +28,7 @@ ytest = np.load('y_test.npy')
 classes = np.unique(ytest).size
 yt = tf.one_hot(yt, classes)
 yv = tf.one_hot(yv, classes)
-ytest = tf.one_hot(ytest, classes)
-
-class TestMetrics(tf.keras.callbacks.Callback):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        super().__init__()
-        
-    def on_epoch_end(self, epoch, logs=None):
-        logs = {} or logs
-        res = self.model.evaluate(self.x, self.y, verbose=0)
-        for metric, result in zip(self.model.metrics_names,res):
-            m_name = 'test_'+metric
-            logs[m_name] = result
-        super().on_epoch_end(epoch, logs)
+# using ytest sparse encoding during test data eval 
 
 batch_size=128
 
@@ -53,17 +36,23 @@ model_list = ['cnn2', 'cnn3', 'cnn6', 'vgg', 'resnet', 'cnn_bn', 'inc3', 'inc6']
 
 for model_name in model_list:
     for seed in range(5):
-        wandb.init(project="synthetic-benchmark", reinit=True)
+        wandb.init(project="synthetic-benchmark", reinit=True, name=f'{model_name}-{seed}')
         wandb.config.update({'model_type' : model_name, 'seed' : seed,
                              'batch_size' : batch_size}, allow_val_change=True)
         callbacks = [EarlyStopping(patience=25, verbose=1,
                                    restore_best_weights=True, min_delta=0.0001),
                      ReduceLROnPlateau(patience=10, verbose=1),
-                     TestMetrics(xtest, ytest),
-                     WandbCallback(save_model=False, save_graph=False)]
+                     WandbCallback(save_model=False, save_graph=False)
+                    ]
         tf.keras.utils.set_random_seed(seed)
         model = getattr(models, model_name)()
         # make sure order of data is identical during training
         tf.keras.utils.set_random_seed(seed)
         model.fit(xt, yt, batch_size=batch_size, epochs=500, verbose=2, 
                   callbacks=callbacks, validation_data=(xv, yv), shuffle=True)
+        tf.keras.models.save_model(model, f'/model_weights/{model_name}-{seed}.h5',
+                                   include_optimizer=True, save_format='h5')
+        pred = np.argmax(model.predict(xtest), axis=1)
+        misclassifications = np.where(pred != ytest)[0].size
+        wandb.log({'wrong_class':misclassifications})
+        
